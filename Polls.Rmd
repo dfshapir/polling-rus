@@ -7,5 +7,78 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(readxl)
+library(ggpubr)
+```
+
+# Data read-in
+
+```{r}
+levada <- read_xlsx("raw-data/levada.xlsx")
+vtsiom <- read_xlsx("raw-data/vtsiom.xlsx")
+fom <- read_xlsx("raw-data/fom.xlsx")
+```
+
+# Putin 
+
+```{r}
+putinlev <- levada %>% 
+  filter(Entity == "Putin") %>%
+  filter(Type == "Approve") %>%
+  select(Entity, `43859`, `43887`, `43915`, `43948`, `43975`) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent")
+
+putinlev$Organization <- "Levada"
+putinlev$Date <- as.Date(as.numeric(putinlev$Date), origin = "1900-01-01")
+
+putinvtsiom <- vtsiom %>%
+  filter(Entity == "Putin") %>%
+  filter(Type == "Approve") %>%
+  select(-Type) %>%
+  mutate(`43883` = as.double(`43883`)) %>%
+  mutate(`43897` = as.double(`43897`)) %>%
+  mutate(`43905` = as.double(`43905`)) %>%
+  mutate(`43912` = as.double(`43912`)) %>%
+  mutate(`43919` = as.double(`43919`)) %>%
+  mutate(`43926` = as.double(`43926`)) %>%
+  mutate(`43933` = as.double(`43933`)) %>%
+  mutate(`43947` = as.double(`43947`)) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent")
+
+putinvtsiom$Organization <- "VTsIOM"
+putinvtsiom$Date <- as.Date(as.numeric(putinvtsiom$Date), origin = "1900-01-01")
+
+putinfom <- fom %>%
+  filter(Entity == "Putin") %>%
+  filter(Type == "Good Work") %>%
+  select(-Type) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent")
+
+putinfom$Organization <- "FOM"
+putinfom$Date <- as.Date(as.numeric(putinfom$Date), origin = "1900-01-01")
+
+putintot <- rbind(putinlev, putinvtsiom, putinfom)
+
+putintot <- putintot %>% group_by(Organization)
+
+plot1 <- ggplot(putintot, aes(x = Date, y = Percent, color = Organization, group = Organization)) + 
+  geom_line() + 
+  geom_point() +
+  labs(y = "Percent Approval",
+       title = "Vladimir Putin's Approval Ratings: End of January to May",
+       subtitle = "Data from Levada, VTsIOM and FOM")
+
+plot1
+
+ggsave(filename = "approv.png")
+```
+
+# Putin Trust
+
+```{r}
+putlevtr <- 
+
+putvtstr <-
 ```
 
