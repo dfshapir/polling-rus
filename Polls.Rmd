@@ -77,8 +77,116 @@ ggsave(filename = "approv.png")
 # Putin Trust
 
 ```{r}
-putlevtr <- 
+putlevtr <- levada %>% 
+  filter(Entity == "Putin") %>%
+  filter(Type == "Trust (5 or 6)") %>%
+  select(-Type, -Org) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent")
 
-putvtstr <-
+putlevtr$Organization <- "Levada"
+putlevtr$Date <- as.Date(as.numeric(putlevtr$Date), origin = "1900-01-01")
+
+putvtstr <- vtsiom %>%
+  filter(Entity == "Putin") %>%
+  filter(Type == "Trust") %>%
+  select(-Type) %>%
+  mutate(`43883` = as.double(`43883`)) %>%
+  mutate(`43897` = as.double(`43897`)) %>%
+  mutate(`43905` = as.double(`43905`)) %>%
+  mutate(`43912` = as.double(`43912`)) %>%
+  mutate(`43919` = as.double(`43919`)) %>%
+  mutate(`43926` = as.double(`43926`)) %>%
+  mutate(`43933` = as.double(`43933`)) %>%
+  mutate(`43947` = as.double(`43947`)) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent")
+
+putvtstr$Organization <- "VTsIOM"
+putvtstr$Date <- as.Date(as.numeric(putvtstr$Date), origin = "1900-01-01")
+
+trusttot <- rbind(putlevtr, putvtstr) %>%
+  na.omit()
+
+trusttot <- trusttot %>% group_by(Organization)
+
+plot2 <- ggplot(trusttot, aes(x = Date, y = Percent, color = Organization, group = Organization)) + 
+  geom_line() + 
+  geom_point() +
+  labs(y = "Percent Listing Putin as Trusted",
+       title = "Percentage Indicating Putin as a Most Trusted Politician",
+       subtitle = "Data from Levada, VTsIOM")
+
+plot2
+
+ggsave(filename = "trust.png")
+```
+
+# United Russia
+
+```{r}
+vtsur <- vtsiom %>%
+  filter(Entity == "United Russia") %>%
+  select(-Type) %>%
+  mutate(`43883` = as.double(`43883`)) %>%
+  mutate(`43897` = as.double(`43897`)) %>%
+  mutate(`43905` = as.double(`43905`)) %>%
+  mutate(`43912` = as.double(`43912`)) %>%
+  mutate(`43919` = as.double(`43919`)) %>%
+  mutate(`43926` = as.double(`43926`)) %>%
+  mutate(`43933` = as.double(`43933`)) %>%
+  mutate(`43947` = as.double(`43947`)) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent")
+
+vtsur$Organization <- "VTsIOM"
+vtsur$Date <- as.Date(as.numeric(vtsur$Date), origin = "1900-01-01")
+  
+fomur <- fom %>% 
+  filter(Entity == "United Russia") %>%
+  select(-Type) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent")
+
+fomur$Organization <- "FOM"
+fomur$Date <- as.Date(as.numeric(fomur$Date), origin = "1900-01-01")
+
+urtot <- rbind(vtsur, fomur)
+
+urtot <- urtot %>%
+  group_by(Organization)
+
+plot4 <- ggplot(urtot, aes(x = Date, y = Percent, color = Organization, group = Organization)) +
+  geom_line() + 
+  geom_point() +
+  ylim(0, 100) +
+  labs(y = "Percent Who Would Choose United Russia",
+       title = "Percent of Respondents Who Would Choose United Russia in an Election",
+       subtitle = "Data from VTsIOM, FOM")
+
+plot4
+
+ggsave(filename = "unitedrussia.png")
+```
+
+# Government
+
+```{r}
+govdat <- fom %>%
+  filter(Entity == "Government") %>%
+  filter(Type == "Good Work") %>%
+  select(-Type) %>%
+  pivot_longer(-`Entity`, names_to = "Date", values_to = "Percent") %>%
+  na.omit()
+
+govdat$Organization <- "FOM"
+govdat$Date <- as.Date(as.numeric(govdat$Date), origin = "1900-01-01")
+
+plot3 <- ggplot(govdat, aes(x = Date, y = Percent, color = Organization, group = Organization)) + geom_line() +
+  geom_point() +
+  ylim(0, 100) +
+  labs(y = "Percent",
+       title = "Percent of Respondents who Believe that the Government is Doing Good Work",
+       subtitle = "Data from FOM")
+
+plot3
+
+ggsave(filename = "govdat.png")
 ```
 
